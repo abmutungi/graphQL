@@ -1,0 +1,40 @@
+.logo {
+    position: relative;
+    top: 50%;
+    left: 40%;
+    margin: 0;
+    font-family: liquorstore-3d;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 46px;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1.2em;
+}
+.pp{
+    position: relative;
+    top: 50%;
+    left: 40%;
+    size-adjust: 50%;
+}
+
+.column {
+    float: left;
+    width: 45%;
+    padding: 10px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+/* Responsive layout - when the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 800px) {
+    .column {
+      width: 100%;
+    }
+  }
