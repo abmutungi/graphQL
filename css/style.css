@@ -1,37 +1,93 @@
 .logo {
     position: relative;
-    top: 50%;
-    left: 40%;
-    margin: 0;
+    display: flex;
+    left: 15%;
+    margin: 25px;
     font-family: liquorstore-3d;
     font-weight: 400;
     font-style: normal;
     font-size: 46px;
     text-transform: uppercase;
     text-decoration: none;
-    display: inline-block;
     line-height: 1.2em;
 }
 .pp{
     position: relative;
-    top: 50%;
-    left: 40%;
-    size-adjust: 50%;
+    left: 35%;
+    width: 30%;
+    vertical-align: middle;
+
 }
 
-.column {
-    float: left;
-    width: 45%;
-    padding: 10px;
+.moving{
+  left:40%;
 }
 
-/* Clear floats after the columns */
+.box{
+  position: relative;
+  width: 300px;
+  height: 200px;
+  border: 2px black solid;
+}
+
+.box-1{
+display: flex; 
+top: 15%!important;
+}
+
+.box-2{
+  display: flex; 
+  top: 15%!important;
+}
+
+.box-3{
+  display: flex; 
+  top: 75%!important;
+}
+
+.box-4{
+  display: flex; 
+  top: 75%!important; 
+}
+
+.box-5{
+  display: flex; 
+  top: 75%!important;
+}
+
+.carousel-caption{
+  font-family: liquorstore-3d;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 26px;
+  text-decoration: none;
+  display: inline-block;
+  line-height: 1.2em;
+  color: #333!important;
+  text-shadow: none!important;
+}
+
+.row {
+  text-align: justify;
+  min-width: 412px;
+  width: 100%; /* it changes by screen size actually */
+  height: 290px;
+  padding: 5px;
+}
+
 .row:after {
-    content: "";
-    display: table;
-    clear: both;
-  }
+  content: '';
+  display: inline-block;
+  width: 100%;
+}
+.col {
+  display: inline-block;
+  justify-content: space-around!important; 
+  width: 30%;
+  padding-left: 10%;
 
+
+}
 /* Responsive layout - when the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 800px) {
     .column {
