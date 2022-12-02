@@ -138,7 +138,7 @@ const createPie = (totalXP, subjData) => {
     for (let first of children) {
         first.addEventListener("mouseover", (e) => {
             pieSubject.innerHTML = e.target.dataset.name;
-            pieXP.innerHTML = Math.floor((e.target.dataset.value/totalXP) *100) + "%";
+            pieXP.innerHTML = ((e.target.dataset.value/totalXP) *100).toFixed(2) + "%";
         });
     }
 
