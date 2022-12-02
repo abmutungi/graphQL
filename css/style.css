@@ -94,6 +94,7 @@ justify-content: flex-start;
 
 #pie-chart {
   padding-top: 10px;
+  cursor: pointer;
 }
 
 .carousel-caption{
