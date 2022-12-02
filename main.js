@@ -3,7 +3,7 @@ let graphql = JSON.stringify({
       user(where:{login:{_eq:"abmutungi"}}){
         login
           transactions(where:{_or: [{_and: [{type: {_eq: "xp"}}, {object: {type: {_eq: "bonus"}}}]},{
-            _and: [{type:{_eq:"xp"}}, {createdAt:{_gt:"2021-10-25"}}, {amount:{_gte:"5000"}}]}]} order_by:{createdAt: desc}){
+            _and: [{type:{_eq:"xp"}}, {createdAt:{_gte:"2021-10-01"}}, {amount:{_gte:"5000"}}]}]} order_by:{createdAt: desc}){
             object{
               name
             }
@@ -48,7 +48,7 @@ const msToDays = (ms) => {
 const sortTransaction = (data) => {
     //console.log("Data from fetch for abmutungi", data);
     for (let obj of data.user) {
-        // console.log(obj.transactions)
+        //  console.log(obj.transactions)
 
         const res = Object.values(
             obj.transactions.reduce((acc, obj) => {
@@ -66,29 +66,25 @@ const sortTransaction = (data) => {
             return new Date(b.object.createdAt) - new Date(a.object.createdAt);
         });
 
-        //console.log(Object.values(res))
-
         let sum = 0;
         let xpPie = {};
 
         for (let subj of Object.values(res)) {
-            // console.log(subj.object.name, subj.amount/1000);
+            console.log(subj.object.name, subj.amount/1000);
             subj.amount = subj.amount / 1000;
             sum += subj.amount;
             xpPie[subj.object.name] = subj.amount;
         }
 
         createPie(sum, xpPie);
+        console.log("SUM", sum)
+        console.log("XPPIE",xpPie)
 
         Object.entries(xpPie).forEach(([key]) => {
             let a = document.createElement("a");
             let linkText = document.createTextNode(`${key}`);
             a.appendChild(linkText);
             a.title = key;
-            a.href = "#";
-            let node = document.createElement("li");
-            node.appendChild(a);
-            document.querySelector("ul").appendChild(node);
         });
 
         let totalXP = Math.round(sum) + "kB";
@@ -120,19 +116,33 @@ const createPie = (totalXP, subjData) => {
     Object.entries(subjData).forEach(([key, value]) => {
         console.log(value);
         let slice = (value / totalXP) * 31.4;
+
         let randomColor = Math.floor(Math.random() * 16777215).toString(16);
 
         pieChart.innerHTML += `
-            // <circle r="5" cx="10" cy="10" fill="transparent"
-            // stroke=#${randomColor}
-            // stroke-width="10"
-            // stroke-dasharray="${slice} 31.4"
-            // stroke-dashoffset="-${strokeDOF}"
-            // />	
-            // `;
+            <circle r="5" cx="10" cy="10" fill="transparent"
+            stroke=#${randomColor}
+            stroke-width="10"
+            stroke-dasharray="${slice} 31.4"
+            stroke-dashoffset="-${strokeDOF}"
+            data-name="${key}"
+            data-value="${value}"
+            />	
+             `;
 
         strokeDOF += slice;
     });
+
+    let children = document.querySelectorAll("#pie-chart > circle");
+
+    for (let first of children) {
+        first.addEventListener("mouseover", (e) => {
+            pieSubject.innerHTML = e.target.dataset.name;
+            pieXP.innerHTML = Math.floor((e.target.dataset.value/totalXP) *100) + "%";
+        });
+    }
+
+    console.log("children", children);
 };
 
 const createTable = (subjData) => {
@@ -141,47 +151,40 @@ const createTable = (subjData) => {
     Object.entries(subjData).forEach(([key, value]) => {
         let tr = "<tr>";
 
-        tr +=
-            "<td>" +
-            key +
-            "</td>" +
-            "<td>" +
-            value.toString() +
-            "</td></tr>";
+        tr += "<td>" + key + "</td>" + "<td>" + value.toString() + "</td></tr>";
 
         /* We add the table row to the table body */
         tbody.innerHTML += tr;
-    })
+    });
 };
 
 const sortProgress = (data) => {
-    // console.log("Data from fetch for abmutungi", data);
+    console.log("Data from fetch for abmutungi", data);
     let projBar = {};
     let grade = {};
 
     for (let obj of data.user) {
-        //console.log(obj.progresses);
+        console.log(obj.progresses);
         obj.progresses.sort(function (a, b) {
             return new Date(a.createdAt) - new Date(b.createdAt);
         });
+        console.log("where is go--reloaded", obj.progresses);
 
         for (let i = 0; i < obj.progresses.length; i++) {
-            projBar[
-                msToDays(
-                    new Date(obj.progresses[i].updatedAt) -
-                        new Date(obj.progresses[i].createdAt)
-                )
-            ] = obj.progresses[i].object.name;
+            projBar[obj.progresses[i].object.name] = msToDays(
+                new Date(obj.progresses[i].updatedAt) -
+                    new Date(obj.progresses[i].createdAt)
+            );
             grade[obj.progresses[i].object.name] =
                 obj.progresses[i].grade.toFixed(2);
         }
     }
-    // console.log(projBar);
+    console.log("where is go--reloaded", projBar);
 
     createTable(grade);
 
     Object.entries(projBar).forEach(([key, value]) => {
-        let barDiv = createBar(key, value);
+        let barDiv = createBar(value, key);
 
         barChart.innerHTML += barDiv;
         yAxis += yRow;
