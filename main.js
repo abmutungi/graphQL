@@ -1,3 +1,18 @@
+const getToken = () => {
+    let myHeaders = new Headers();
+    myHeaders.append("Authorization", `Basic YWJtdXR1bmdpOkJlaWd1bWFtdTIz`);
+
+    let requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        redirect: "follow",
+    };
+
+    return fetch("https://learn.01founders.co/api/auth/signin", requestOptions)
+        .then((response) => response.text())
+        .then((result) => result);
+};
+
 let graphql = JSON.stringify({
     query: `{
       user(where:{login:{_eq:"abmutungi"}}){
@@ -22,75 +37,94 @@ let graphql = JSON.stringify({
         }`,
 });
 
-let requestOptions = {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    body: graphql,
-};
+(async () => {
+    const token = await getToken();
+    console.log(token);
 
-fetch(
-    "https://learn.01founders.co/api/graphql-engine/v1/graphql",
-    requestOptions
-)
-    .then((response) => response.json())
-    .then(function (result) {
-        sortTransaction(result.data);
-        sortProgress(result.data);
-    })
-    .catch((error) => console.log("error", error));
+    let requestOptions = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token.slice(1, token.length - 1),
+        },
+        body: graphql,
+    };
+    console.log(requestOptions);
+
+    fetch(
+        "https://learn.01founders.co/api/graphql-engine/v1/graphql",
+        requestOptions
+    )
+        .then((response) => response.json())
+        .then((result) => {
+            console.log(result)
+            if (result && result.data) {
+                sortTransaction(result.data);
+                sortProgress(result.data);
+            } else {
+                console.log("Invalid response data:", result);
+            }
+        })
+        .catch((error) => console.log("error", error));
+
+})();
+
 
 const msToDays = (ms) => {
     return Math.trunc(ms / (1000 * 60 * 60 * 24));
 };
 
 const sortTransaction = (data) => {
-    //console.log("Data from fetch for abmutungi", data);
-    for (let obj of data.user) {
-        //  console.log(obj.transactions)
 
-        const res = Object.values(
-            obj.transactions.reduce((acc, obj) => {
-                const curr = acc[obj.object.name];
-                acc[obj.object.name] = curr
-                    ? curr.amount < obj.amount
-                        ? obj
-                        : curr
-                    : obj;
-                return acc;
-            }, {})
-        );
+    if (data && data.user) {
+        //console.log("Data from fetch for abmutungi", data);
+        for (let obj of data.user) {
+            //  console.log(obj.transactions)
 
-        res.sort(function (a, b) {
-            return new Date(b.object.createdAt) - new Date(a.object.createdAt);
-        });
+            const res = Object.values(
+                obj.transactions.reduce((acc, obj) => {
+                    const curr = acc[obj.object.name];
+                    acc[obj.object.name] = curr
+                        ? curr.amount < obj.amount
+                            ? obj
+                            : curr
+                        : obj;
+                    return acc;
+                }, {})
+            );
 
-        let sum = 0;
-        let xpPie = {};
+            res.sort(function (a, b) {
+                return new Date(b.object.createdAt) - new Date(a.object.createdAt);
+            });
 
-        for (let subj of Object.values(res)) {
-            console.log(subj.object.name, subj.amount/1000);
-            subj.amount = subj.amount / 1000;
-            sum += subj.amount;
-            xpPie[subj.object.name] = subj.amount;
+            let sum = 0;
+            let xpPie = {};
+
+            for (let subj of Object.values(res)) {
+                console.log(subj.object.name, subj.amount / 1000);
+                subj.amount = subj.amount / 1000;
+                sum += subj.amount;
+                xpPie[subj.object.name] = subj.amount;
+            }
+
+            createPie(sum, xpPie);
+            console.log("SUM", sum);
+            console.log("XPPIE", xpPie);
+
+            Object.entries(xpPie).forEach(([key]) => {
+                let a = document.createElement("a");
+                let linkText = document.createTextNode(`${key}`);
+                a.appendChild(linkText);
+                a.title = key;
+            });
+
+            let totalXP = Math.round(sum) + "kB";
+            console.log(totalXP);
+
+            xp.innerHTML = totalXP;
         }
-
-        createPie(sum, xpPie);
-        console.log("SUM", sum)
-        console.log("XPPIE",xpPie)
-
-        Object.entries(xpPie).forEach(([key]) => {
-            let a = document.createElement("a");
-            let linkText = document.createTextNode(`${key}`);
-            a.appendChild(linkText);
-            a.title = key;
-        });
-
-        let totalXP = Math.round(sum) + "kB";
-        console.log(totalXP);
-
-        xp.innerHTML = totalXP;
+    } else {
+                console.log("Invalid data object:", data);
     }
 };
 
@@ -138,7 +172,8 @@ const createPie = (totalXP, subjData) => {
     for (let first of children) {
         first.addEventListener("mouseover", (e) => {
             pieSubject.innerHTML = e.target.dataset.name;
-            pieXP.innerHTML = ((e.target.dataset.value/totalXP) *100).toFixed(2) + "%";
+            pieXP.innerHTML =
+                ((e.target.dataset.value / totalXP) * 100).toFixed(2) + "%";
         });
     }
 
@@ -193,3 +228,4 @@ const sortProgress = (data) => {
         (yAxis = 9);
     startY = 0;
 };
+
